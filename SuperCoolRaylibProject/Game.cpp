@@ -1,11 +1,7 @@
 #include "Game.h"
 #include "Player.h"
 #include "VectorHelpers.h"
-
-struct CameraState {
-	Camera3D camera;
-	CameraMode mode;
-};
+#include "Camera.h"
 
 // ANCHOR - Public Methods
 void Game::Init() {
@@ -17,7 +13,7 @@ void Game::Init() {
 	HideCursor();
 
 	camera_state = InitCamera();
-	player->Init(&camera_state->camera);
+	player->Init(camera_state);
 }
 
 void Game::Tick() {
@@ -38,11 +34,10 @@ void Game::Draw() {
 	EndDrawing();
 }
 
-
-
 // ANCHOR - Private Methods
-CameraState* Game::InitCamera() {
-	auto state = new CameraState();
+std::shared_ptr<CameraState> Game::InitCamera() {
+	auto state = std::make_shared<CameraState>();
+
 	state->camera.position = Vector3{ 0.f, 3.f, 4.f };
 	state->camera.target = veclib::VEC3_ZERO;
 	state->camera.up = veclib::VEC3_UP;
@@ -66,8 +61,6 @@ void Game::DrawEnv() const {
 	DrawCube(Vector3 { 0, 2, 16 }, 32, 5, 1, GOLD);      // Draw a yellow wall
 }
 
-Game::~Game()
-{
+Game::~Game() {
 	delete player;
-	delete camera_state;
 }

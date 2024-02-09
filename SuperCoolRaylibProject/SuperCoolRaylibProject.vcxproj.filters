@@ -47,6 +47,9 @@
     <ClInclude Include="raylib_operator_overloads.hpp">
       <Filter>Arquivos de Origem\Lib</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="SuperCoolRaylibProject.rc">

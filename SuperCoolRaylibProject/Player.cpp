@@ -1,9 +1,11 @@
 #include "Player.h"
 #include "VectorHelpers.h"
 #include "raylib_operator_overloads.hpp"
+#include "Camera.h"
+#include <stdio.h>
 
-void Player::Init(Camera3D* player_cam) {
-	camera = player_cam;
+void Player::Init(std::shared_ptr<CameraState> player_cam) {
+	camera_state = player_cam;
 
 	transform.translation = Vector3 { 0.f, 5.f, 0.f };
 	transform.rotation = Quaternion{};
@@ -17,34 +19,69 @@ void Player::Tick(float delta_time) {
 	velocity *= 1.f / (1.f + delta_time * 2);
 
 	// Camera movement
-	camera->position += velocity * delta_time;
+	camera_state->camera.position += velocity * delta_time;
 
 	// Camera Position
-	camera->target = camera->position + (VEC3_FORWARD * kForwardCamOffset + VEC3_UP * kUpCamOffset);
+	camera_state->camera.target = camera_state->camera.position + (VEC3_FORWARD * kForwardCamOffset + VEC3_UP * kUpCamOffset);
 
 	// Assign camera calculations to tranform
-	transform.translation = camera->target;
+	transform.translation = camera_state->camera.target;
 
 	HandleInput(delta_time);
+	CalculateBoundingBox();
 }
 
 void Player::Draw() {
 	DrawCubeV(transform.translation, transform.scale, PURPLE);
 }
 
-void Player::HandleInput(float delta_time) {
-	if (IsKeyDown(KEY_W)) velocity += veclib::VEC3_FORWARD * delta_time * kMaxSpeed;
-	if (IsKeyDown(KEY_S)) velocity -= veclib::VEC3_FORWARD * delta_time * kMaxSpeed;
-
-	if (IsKeyDown(KEY_D)) velocity -= veclib::VEC3_RIGHT * delta_time * kMaxSpeed;
-	if (IsKeyDown(KEY_A)) velocity += veclib::VEC3_RIGHT * delta_time * kMaxSpeed;
-}
-
-// FIXME - Might be causing a Double Free with the camera pointer
-Player::~Player() {
-	if (camera == nullptr) {
-		return;
+void Player::adjustPlayerOnCollision(BoundingBox* box2) {
+	if (bounding_box.max.x > box2->max.x) {
+		velocity.x = Clamp(velocity.x, kCollisionOffset, kMaxSpeed);
+	}
+	if (bounding_box.max.x < box2->max.x) {
+		velocity.x = Clamp(velocity.x, -kMaxSpeed, -kCollisionOffset);
 	}
 
-	delete camera;
+	if (bounding_box.max.z > box2->max.z) {
+		velocity.z = Clamp(velocity.z, kCollisionOffset, kMaxSpeed);
+	}
+
+	if (bounding_box.max.z < box2->max.z) {
+		velocity.z = Clamp(velocity.z, -kMaxSpeed, -kCollisionOffset);
+	}
+}
+
+void Player::HandleInput(float delta_time) {
+	if (IsKeyDown(KEY_W)) {
+		velocity += veclib::VEC3_FORWARD * delta_time * kMaxSpeed;;
+	}
+
+	if (IsKeyDown(KEY_S)) {
+		velocity -= veclib::VEC3_FORWARD * delta_time * kMaxSpeed;
+	}
+
+	if (IsKeyDown(KEY_D)) {
+		velocity -= veclib::VEC3_RIGHT * delta_time * kMaxSpeed;
+	}
+
+	if (IsKeyDown(KEY_A)) {
+		velocity += veclib::VEC3_RIGHT * delta_time * kMaxSpeed;
+	}
+}
+
+void Player::CalculateBoundingBox() {
+	bounding_box = BoundingBox{};
+
+	bounding_box.min = Vector3 {
+		transform.translation.x - transform.scale.x / 2,
+		transform.translation.y - transform.scale.y / 2,
+		transform.translation.z - transform.scale.z / 2,
+	};
+
+	bounding_box.max = Vector3 {
+		transform.translation.x + transform.scale.x / 2,
+		transform.translation.y + transform.scale.y / 2,
+		transform.translation.z + transform.scale.z / 2,
+	};
 }

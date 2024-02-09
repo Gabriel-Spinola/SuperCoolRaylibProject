@@ -2,6 +2,7 @@
 
 #include "raylib.h"
 #include <cstdint>
+#include <memory>
 
 class Player;
 struct CameraState;
@@ -16,7 +17,7 @@ constexpr int32_t kMaxColumns = 20;
 
 class Game {
 public:
-	CameraState* camera_state;
+	std::shared_ptr<CameraState> camera_state;
 
 	void Init();
 	void Tick();
@@ -27,7 +28,7 @@ public:
 private:
 	Player* player;
 
-	CameraState* InitCamera();
+	std::shared_ptr<CameraState> InitCamera();
 
 	void DrawUI() const;
 	void DrawEnv() const;
