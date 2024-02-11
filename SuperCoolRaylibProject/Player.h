@@ -17,15 +17,14 @@ public:
 	void Tick(float delta_time);
 	void Draw();
 
-	void adjustPlayerOnCollision(BoundingBox* box2);
+	inline void AdjustPlayerOnCollision(BoundingBox& box2);
 
 private:
 	const float kMaxSpeed = 10.f;
-	const float kForwardCamOffset = 3.f;
-	const float kUpCamOffset = -1.5f;
+	const float kForwardCamOffset = -3.f;
+	const float kUpCamOffset = 1.5f;
 	const float kCollisionOffset = .1f;
 
 	void HandleInput(float delta_time);
 	void CalculateBoundingBox();
 };
-

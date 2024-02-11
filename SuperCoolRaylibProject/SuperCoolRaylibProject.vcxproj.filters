@@ -19,6 +19,9 @@
     <Filter Include="Arquivos de Origem\Player">
       <UniqueIdentifier>{08b2c3c4-1232-4fc3-b3dd-9851dbfdfee2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Arquivos de Origem\Editor">
+      <UniqueIdentifier>{9497b156-b692-47d5-b143-9855e66c508e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="SuperCoolRaylibProject.cpp">
@@ -32,6 +35,9 @@
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>Arquivos de Origem\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Editor.cpp">
+      <Filter>Arquivos de Origem\Editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -48,6 +54,9 @@
       <Filter>Arquivos de Origem\Lib</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h">
+      <Filter>Arquivos de Cabeçalho</Filter>
+    </ClInclude>
+    <ClInclude Include="Editor.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
   </ItemGroup>

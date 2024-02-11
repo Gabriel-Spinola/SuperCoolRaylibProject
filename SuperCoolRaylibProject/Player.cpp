@@ -7,7 +7,7 @@
 void Player::Init(std::shared_ptr<CameraState> player_cam) {
 	camera_state = player_cam;
 
-	transform.translation = Vector3 { 0.f, 5.f, 0.f };
+	transform.translation = Vector3 { 0.f, 3.f, 0.f };
 	transform.rotation = Quaternion{};
 	transform.scale = Vector3 { 1.f, 3.f, 1.f };
 }
@@ -18,14 +18,23 @@ void Player::Tick(float delta_time) {
 	// Damping
 	velocity *= 1.f / (1.f + delta_time * 2);
 
-	// Camera movement
-	camera_state->camera.position += velocity * delta_time;
+	// Movement
+	transform.translation += velocity * delta_time;
 
-	// Camera Position
-	camera_state->camera.target = camera_state->camera.position + (VEC3_FORWARD * kForwardCamOffset + VEC3_UP * kUpCamOffset);
+	// Offset camera to be behind the player
+	camera_state->camera.position = transform.translation + (VEC3_FORWARD * kForwardCamOffset + VEC3_UP * kUpCamOffset);
 
-	// Assign camera calculations to tranform
-	transform.translation = camera_state->camera.target;
+	Vector2 mousePos = GetMousePosition();
+	Vector2 targetPos = GetWorldToScreen(transform.translation, camera_state->camera);
+	
+	//mousePos.x -= targetPos.x;
+	//mousePos.y -= targetPos.y;
+
+	// Assign camera target to player;
+	camera_state->camera.target = transform.translation;
+		
+	//UpdateCamera(&camera_state->camera, camera_state->mode);
+	UpdateCameraPro(&camera_state->camera, VEC3_ZERO, VEC3_ZERO, 1.f);
 
 	HandleInput(delta_time);
 	CalculateBoundingBox();
@@ -35,19 +44,20 @@ void Player::Draw() {
 	DrawCubeV(transform.translation, transform.scale, PURPLE);
 }
 
-void Player::adjustPlayerOnCollision(BoundingBox* box2) {
-	if (bounding_box.max.x > box2->max.x) {
+inline void Player::AdjustPlayerOnCollision(BoundingBox& box2) {
+	if (bounding_box.max.x > box2.max.x) {
 		velocity.x = Clamp(velocity.x, kCollisionOffset, kMaxSpeed);
 	}
-	if (bounding_box.max.x < box2->max.x) {
+
+	if (bounding_box.max.x < box2.max.x) {
 		velocity.x = Clamp(velocity.x, -kMaxSpeed, -kCollisionOffset);
 	}
 
-	if (bounding_box.max.z > box2->max.z) {
+	if (bounding_box.max.z > box2.max.z) {
 		velocity.z = Clamp(velocity.z, kCollisionOffset, kMaxSpeed);
 	}
 
-	if (bounding_box.max.z < box2->max.z) {
+	if (bounding_box.max.z < box2.max.z) {
 		velocity.z = Clamp(velocity.z, -kMaxSpeed, -kCollisionOffset);
 	}
 }

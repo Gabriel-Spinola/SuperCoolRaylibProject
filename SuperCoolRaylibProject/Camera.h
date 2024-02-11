@@ -6,4 +6,5 @@
 struct CameraState {
 	Camera3D camera;
 	CameraMode mode;
+	bool is_enable;
 };

@@ -6,29 +6,56 @@
 // ANCHOR - Public Methods
 void Game::Init() {
 	player = new Player();
+	editor = std::make_unique<Editor>();
 
 	InitWindow(kScreenWidth, kScreenHeight, kWindowTitle);
 
 	SetTargetFPS(kFrameRate);
-	HideCursor();
+	DisableCursor();
 
 	camera_state = InitCamera();
 	player->Init(camera_state);
+	editor->Init();
 }
 
 void Game::Tick() {
+	camera_state->is_enable = !is_on_editing_mode;
+	editor->camera_state->is_enable = is_on_editing_mode;
+
+	if (IsKeyPressed(KEY_LEFT_ALT)) {
+		is_on_editing_mode = !is_on_editing_mode;
+		DisableCursor();
+
+		if (is_on_editing_mode) {
+			EnableCursor();
+		}
+	}
+
+	if (is_on_editing_mode) {
+		editor->Tick();
+
+		return;
+	}
+
 	player->Tick(GetFrameTime());
 }
 
-void Game::Draw() {
+void Game::Draw() const {
 	BeginDrawing();
 		ClearBackground(RAYWHITE);
 
-		BeginMode3D(camera_state->camera);
+		BeginMode3D(is_on_editing_mode ? editor->camera_state->camera : camera_state->camera);
 			player->Draw();
-
 			DrawEnv();
+
+			if (is_on_editing_mode) {
+				editor->DrawWorld();
+			}
 		EndMode3D();
+
+		if (is_on_editing_mode) {
+			editor->DrawUI();
+		}
 
 		DrawUI();
 	EndDrawing();
@@ -41,7 +68,7 @@ std::shared_ptr<CameraState> Game::InitCamera() {
 	state->camera.position = Vector3{ 0.f, 3.f, 4.f };
 	state->camera.target = veclib::VEC3_ZERO;
 	state->camera.up = veclib::VEC3_UP;
-	state->camera.fovy = 60;
+	state->camera.fovy = 60.f;
 	state->camera.projection = CameraProjection::CAMERA_PERSPECTIVE;
 
 	state->mode = CameraMode::CAMERA_FIRST_PERSON;
